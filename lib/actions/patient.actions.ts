@@ -10,9 +10,7 @@ declare interface CreateUserParams {
 
 export const createUser = async (user: CreateUserParams) => {
   try {
-    console.log(user, 'from create user');
-    console.log(users, 'USERS');
-    
+
     const newUser = await users.create(
       ID.unique(),
       user.email,
@@ -22,9 +20,9 @@ export const createUser = async (user: CreateUserParams) => {
     )
     return parseStringify(newUser);
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
-    if(error && error?.code === 409) {
+    if (error && error?.code === 409) {
       const documents = await users.list([
         Query.equal("email", [user.email])
       ])
@@ -33,3 +31,14 @@ export const createUser = async (user: CreateUserParams) => {
     console.error("An error occurred while creating a new user:", error);
   }
 }
+
+export const getUser = async (userId: string) => {
+  try {
+    const user = await users.get(userId);
+
+    return parseStringify(user);
+
+  } catch (error) {
+    console.log(error);
+  }
+} 
