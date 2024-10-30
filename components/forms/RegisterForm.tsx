@@ -7,54 +7,82 @@ import { useRouter } from "next/navigation"
 import { z } from "zod"
 
 import { Form, FormControl } from "@/components/ui/form"
-import { createUser } from "@/lib/actions/patient.actions"
-import { UserFormValidation } from "@/lib/validation"
+import { PatientFormValidation } from "@/lib/validation"
 
 import CustomFormField from "../CustomFormField"
 import SubmitButton from "../SubmitButton"
 import { formFieldType } from "./PatientForm"
 import { RadioGroup, RadioGroupItem } from "../ui/radio-group"
-import { Doctors, GenderOptions, IdentificationTypes } from "@/constants"
+import { Doctors, GenderOptions, IdentificationTypes, PatientFormDefaultValues } from "@/constants"
 import { Label } from "../ui/label"
 
 import Image from "next/image"
 import { SelectItem } from "../ui/select"
 import FileUploader from "../FileUploader"
+import { registerPatient } from "@/lib/actions/patient.actions"
 
 function RegisterForm({ user }: { user: User }) {
   const router = useRouter();
 
-
-
-
   const [isLoading, setIsLoading] = useState(false)
 
-  const form = useForm<z.infer<typeof UserFormValidation>>({
-    resolver: zodResolver(UserFormValidation),
+  const form = useForm<z.infer<typeof PatientFormValidation>>({
+    resolver: zodResolver(PatientFormValidation),
     defaultValues: {
+      ...PatientFormDefaultValues,
       name: "",
       email: "",
       phone: "",
     },
   })
 
-  const onSubmit = async (values: z.infer<typeof UserFormValidation>) => {
+  const onSubmit = async (values: z.infer<typeof PatientFormValidation>) => {
     setIsLoading(true);
 
-    console.log(user);
+    let formData;
+
+    if (values.identificationDocument && values.identificationDocument.length > 0) {
+      const blobFile = new Blob([values.identificationDocument[0]],
+        { type: values.identificationDocument[0].type },
+      )
+
+      formData = new FormData();
+      formData.append('blobFile', blobFile);
+      formData.append('fileName', values.identificationDocument[0].name);
+    }
 
     try {
-      const user = {
+      const patient = {
+        userId: user.$id,
         name: values.name,
         email: values.email,
-        phone: values.phone
+        phone: values.phone,
+        birthDate: new Date(values.birthDate),
+        gender: values.gender,
+        address: values.address,
+        occupation: values.occupation,
+        emergencyContactName: values.emergencyContactName,
+        emergencyContactNumber: values.emergencyContactNumber,
+        primaryPhysician: values.primaryPhysician,
+        insuranceProvider: values.insuranceProvider,
+        insurancePolicyNumber: values.insurancePolicyNumber,
+        allergies: values.allergies,
+        currentMedications: values.currentMedications,
+        familyMedicalHistory: values.familyMedicalHistory,
+        pastMedicalHistory: values.pastMedicalHistory,
+        identificationType: values.identificationType,
+        identificationNumber: values.identificationNumber,
+        identificationDocument: values.identificationDocument
+          ? formData
+          : undefined,
+        privacyConsent: values.privacyConsent,
+        disclosureConsent: values.disclosureConsent,
+        treatmentConsent: values.treatmentConsent,
       };
 
-      const newUser = await createUser(user);
+      const newPatient = await registerPatient(patient);
 
-      if (newUser) {
-        router.push(`/patients/${newUser.$id}`)
-      }
+      if (newPatient) router.push(`/patients/${user.$id}/new-appointment`)
 
     } catch (error) {
       console.log(error);
@@ -113,7 +141,7 @@ function RegisterForm({ user }: { user: User }) {
           <CustomFormField
             fieldType={formFieldType.DATE_PICKER}
             control={form.control}
-            name="dateBirth"
+            name="birthDate"
             label="Date of birth"
           />
 
@@ -166,7 +194,7 @@ function RegisterForm({ user }: { user: User }) {
           <CustomFormField
             fieldType={formFieldType.INPUT}
             control={form.control}
-            name="emergency-phone"
+            name="emergencyContactName"
             label="Emergency contact name"
             placeholder="Guardian's name"
           />
@@ -174,7 +202,7 @@ function RegisterForm({ user }: { user: User }) {
           <CustomFormField
             fieldType={formFieldType.PHONE_INPUT}
             control={form.control}
-            name="emergency-phone"
+            name="emergencyContactNumber"
             label="Emergency phone number"
             placeholder="ex: +1 (868) 579-9831"
           />
@@ -189,7 +217,7 @@ function RegisterForm({ user }: { user: User }) {
         <CustomFormField
           fieldType={formFieldType.SELECT}
           control={form.control}
-          name="primary-physician"
+          name="primaryPhysician"
           label="Primary care physician"
           placeholder="Select a physician"
         >
@@ -213,7 +241,7 @@ function RegisterForm({ user }: { user: User }) {
           <CustomFormField
             fieldType={formFieldType.INPUT}
             control={form.control}
-            name="insurance-provider"
+            name="insuranceProvider"
             label="Insurance provider"
             placeholder="ex: BlueCross BlueShield"
           />
@@ -221,7 +249,7 @@ function RegisterForm({ user }: { user: User }) {
           <CustomFormField
             fieldType={formFieldType.INPUT}
             control={form.control}
-            name="policy-number"
+            name="insurancePolicyNumber"
             label="Insurance policy number"
             placeholder="ex: ABC1234567"
           />
@@ -239,7 +267,7 @@ function RegisterForm({ user }: { user: User }) {
           <CustomFormField
             fieldType={formFieldType.TEXTAREA}
             control={form.control}
-            name="current-medications"
+            name="currentMedications"
             label="Current medications"
             placeholder="ex: Ibuprofen 200mg, Levothyroxine 50mcg"
           />
@@ -249,7 +277,7 @@ function RegisterForm({ user }: { user: User }) {
           <CustomFormField
             fieldType={formFieldType.TEXTAREA}
             control={form.control}
-            name="family-medical-history-"
+            name="familyMedicalHistory-"
             label="Family medical history (if relevant)"
             placeholder="ex: Mother had breast cancer "
           />
@@ -257,7 +285,7 @@ function RegisterForm({ user }: { user: User }) {
           <CustomFormField
             fieldType={formFieldType.TEXTAREA}
             control={form.control}
-            name="past-medical-history"
+            name="pastMedicalHistory"
             label="Past medical history"
             placeholder="ex: Asthma diagnosis in childhood"
           />
@@ -272,9 +300,9 @@ function RegisterForm({ user }: { user: User }) {
         <CustomFormField
           fieldType={formFieldType.SELECT}
           control={form.control}
-          name="primary-physician"
-          label="Primary care physician"
-          placeholder="Select a physician"
+          name="identificationType"
+          label="Identification Type"
+          placeholder="Select a type"
         >
           {IdentificationTypes.map((type, i) => (
             <SelectItem key={type + i} value={type} className="cursor-pointer">
@@ -286,7 +314,7 @@ function RegisterForm({ user }: { user: User }) {
         <CustomFormField
           fieldType={formFieldType.INPUT}
           control={form.control}
-          name="identification-number"
+          name="identificationNumber"
           label="Identification Number"
           placeholder="ex: 123456789"
         />
@@ -294,7 +322,7 @@ function RegisterForm({ user }: { user: User }) {
         <CustomFormField
           fieldType={formFieldType.SKELETON}
           control={form.control}
-          name="identification-document"
+          name="identificationDocument"
           label="Scanned Copy of Identification Document"
           renderSkeleton={(field) => (
             <FormControl>
@@ -312,21 +340,21 @@ function RegisterForm({ user }: { user: User }) {
         <CustomFormField
           fieldType={formFieldType.CHECKBOX}
           control={form.control}
-          name="treatment-consent"
+          name="treatmentConsent"
           label="I consent to receive treatment for my health condition."
         />
 
         <CustomFormField
           fieldType={formFieldType.CHECKBOX}
           control={form.control}
-          name="disclosure-consent"
+          name="disclosureConsent"
           label="I consent to the use and disclosure of my health information for treatment purposes."
         />
 
         <CustomFormField
           fieldType={formFieldType.CHECKBOX}
           control={form.control}
-          name="privacy-consent"
+          name="privacyConsent"
           label="I acknowledge that I have reviewed and agree to the privacy policy"
         />
 
