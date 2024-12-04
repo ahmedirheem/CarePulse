@@ -32,6 +32,7 @@ const SuccessPage = async ({ params: { userId }, searchParams }: SearchParamProp
             src='/assets/gifs/success.gif'
             height={300}
             width={280}
+            unoptimized
             alt='success'
           />
 

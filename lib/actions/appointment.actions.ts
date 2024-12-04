@@ -4,6 +4,7 @@ import { ID, Query } from "node-appwrite";
 import { APPOINTMENT_COLLECTION_ID, DATABASE_ID, databases } from "../appwrite.config";
 import { parseStringify } from "../utils";
 import { Appointment } from "@/types/appwrite.types";
+import { revalidatePath } from "next/cache";
 
 export const createAppointment = async (appointment: CreateAppointmentParams) => {
   try {
@@ -42,6 +43,8 @@ export const getRecentAppointmentList = async () => {
       APPOINTMENT_COLLECTION_ID!,
       [Query.orderDesc('$createdAt')]
     )
+    console.log('appointments form actions', appointments);
+    
 
     const initialCounts = {
       scheduledCount: 0,
@@ -69,5 +72,29 @@ export const getRecentAppointmentList = async () => {
     return parseStringify(data)
   } catch (error) {
     console.log("An error occurred while getting recent appointment list", error);
+  }
+}
+
+export const updateAppointment = async ({
+  appointmentId,
+  // userId,
+  // timeZone,
+  appointment,
+  // type,
+}: UpdateAppointmentParams) => {
+  try {
+    const updatedAppointment = await databases.updateDocument(
+      DATABASE_ID!,
+      APPOINTMENT_COLLECTION_ID!,
+      appointmentId,
+      appointment
+    );
+
+    if (!updatedAppointment) throw Error;
+
+    revalidatePath("/admin");
+    return parseStringify(updatedAppointment);
+  } catch (error) {
+    console.error("An error occurred while scheduling an appointment:", error);
   }
 }
