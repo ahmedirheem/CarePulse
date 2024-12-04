@@ -1,8 +1,8 @@
 'use server';
 
 import { ID, Query } from "node-appwrite";
-import { APPOINTMENT_COLLECTION_ID, DATABASE_ID, databases } from "../appwrite.config";
-import { parseStringify } from "../utils";
+import { APPOINTMENT_COLLECTION_ID, DATABASE_ID, databases, messaging } from "../appwrite.config";
+import { formatDateTime, parseStringify } from "../utils";
 import { Appointment } from "@/types/appwrite.types";
 import { revalidatePath } from "next/cache";
 
@@ -43,8 +43,6 @@ export const getRecentAppointmentList = async () => {
       APPOINTMENT_COLLECTION_ID!,
       [Query.orderDesc('$createdAt')]
     )
-    console.log('appointments form actions', appointments);
-    
 
     const initialCounts = {
       scheduledCount: 0,
@@ -75,12 +73,28 @@ export const getRecentAppointmentList = async () => {
   }
 }
 
+export const sendSMSNotification = async (userId: string, content: string) => {
+  try {
+    const message = await messaging.createSms(
+      ID.unique(),
+      content,
+      [],
+      [userId]
+    )
+
+    return parseStringify(message)
+  } catch (error) {
+    console.log('An error occur while sending SMS notification', error);
+
+  }
+}
+
 export const updateAppointment = async ({
   appointmentId,
-  // userId,
+  userId,
   // timeZone,
   appointment,
-  // type,
+  type,
 }: UpdateAppointmentParams) => {
   try {
     const updatedAppointment = await databases.updateDocument(
@@ -90,7 +104,17 @@ export const updateAppointment = async ({
       appointment
     );
 
-    if (!updatedAppointment) throw Error;
+    if (!updatedAppointment) throw new Error('Appointment Not Found');
+
+    const smsMessage = `
+      Hi, it's CarePulse.
+      ${type === 'schedule'
+        ? `Your appointment has been scheduled for ${formatDateTime(appointment.schedule!)}`
+        : `We regret to inform you that your appointment has been cancelled for the following reason: ${appointment.cancellationReason}`
+      }
+    `
+
+    await sendSMSNotification(userId, smsMessage)
 
     revalidatePath("/admin");
     return parseStringify(updatedAppointment);
