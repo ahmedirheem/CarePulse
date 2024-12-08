@@ -7,7 +7,7 @@ import DataTable from '@/components/table/DataTable'
 import {columns} from '@/components/table/columns'
 
 const AdminDashboard = async () => {
-  const appointments = await getRecentAppointmentList()
+  const appointments = await getRecentAppointmentList();  
 
   return (
     <div className='mx-auto flex flex-col space-y-14 max-w-7xl'>
@@ -31,8 +31,8 @@ const AdminDashboard = async () => {
 
         <section className='admin-stat'>
           <StatCard type='appointments' label='Scheduled appointments' count={appointments.scheduledCount} icon='/assets/icons/appointments.svg' />
-          <StatCard type='pending' label='Pending appointments' count={appointments.pendingCounts} icon='/assets/icons/pending.svg' />
-          <StatCard type='cancelled' label='Cancelled appointments' count={appointments.cancelledCounts} icon='/assets/icons/cancelled.svg' />
+          <StatCard type='pending' label='Pending appointments' count={appointments.pendingCount} icon='/assets/icons/pending.svg' />
+          <StatCard type='cancelled' label='Cancelled appointments' count={appointments.cancelledCount} icon='/assets/icons/cancelled.svg' />
         </section>
 
         <DataTable columns={columns} data={appointments.documents} />

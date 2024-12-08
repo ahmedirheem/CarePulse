@@ -29,7 +29,7 @@ function AppointmentForm({
   patientId: string;
   type: 'create' | 'cancel' | 'schedule';
   appointment?: Appointment;
-  setOpen: Dispatch<SetStateAction<boolean>>
+  setOpen?: Dispatch<SetStateAction<boolean>>
 }) {
   const router = useRouter();
 
@@ -101,8 +101,8 @@ function AppointmentForm({
         const updatedAppointment = await updateAppointment(appointmentToUpdate);
 
         if (updatedAppointment) {
-          setOpen(false)
           form.reset();
+          setOpen?.(false);
         }
       }
 

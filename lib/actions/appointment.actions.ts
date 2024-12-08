@@ -37,41 +37,51 @@ export const getAppointment = async (appointmentId: string) => {
 }
 
 export const getRecentAppointmentList = async () => {
-  try {
+  try {    
     const appointments = await databases.listDocuments(
       DATABASE_ID!,
       APPOINTMENT_COLLECTION_ID!,
-      [Query.orderDesc('$createdAt')]
-    )
+      [Query.orderDesc("$createdAt")]
+    );
 
     const initialCounts = {
       scheduledCount: 0,
-      pendingCounts: 0,
-      cancelledCounts: 0,
-    }
+      pendingCount: 0,
+      cancelledCount: 0,
+    };
 
-    const counts = (appointments.documents as Appointment[]).reduce((acc, appointment) => {
-      if (appointment.status === 'scheduled') {
-        acc.scheduledCount += 1
-      } else if (appointment.status === 'pending') {
-        acc.pendingCounts += 1
-      } else if (appointment.status === 'cancelled') {
-        acc.cancelledCounts += 1
-      }
-      return acc;
-    }, initialCounts)
+    const counts = (appointments.documents as Appointment[]).reduce(
+      (acc, appointment) => {
+        switch (appointment.status) {
+          case "scheduled":
+            acc.scheduledCount++;
+            break;
+          case "pending":
+            acc.pendingCount++;
+            break;
+          case "cancelled":
+            acc.cancelledCount++;
+            break;
+        }
+        return acc;
+      },
+      initialCounts
+    );
 
     const data = {
       totalCount: appointments.total,
       ...counts,
-      documents: appointments.documents
-    }
+      documents: appointments.documents,
+    };
 
-    return parseStringify(data)
+    return parseStringify(data);
   } catch (error) {
-    console.log("An error occurred while getting recent appointment list", error);
+    console.error(
+      "An error occurred while retrieving the recent appointments:",
+      error
+    );
   }
-}
+};
 
 export const sendSMSNotification = async (userId: string, content: string) => {
   try {
@@ -85,14 +95,12 @@ export const sendSMSNotification = async (userId: string, content: string) => {
     return parseStringify(message)
   } catch (error) {
     console.log('An error occur while sending SMS notification', error);
-
   }
 }
 
 export const updateAppointment = async ({
   appointmentId,
   userId,
-  // timeZone,
   appointment,
   type,
 }: UpdateAppointmentParams) => {
@@ -104,12 +112,12 @@ export const updateAppointment = async ({
       appointment
     );
 
-    if (!updatedAppointment) throw new Error('Appointment Not Found');
+    if (!updatedAppointment) throw Error;
 
     const smsMessage = `
-      Hi, it's CarePulse.
+      Greetings from CarePulse.
       ${type === 'schedule'
-        ? `Your appointment has been scheduled for ${formatDateTime(appointment.schedule!)}`
+        ? `Your appointment has been scheduled for ${formatDateTime(appointment.schedule!).dateTime} with doctor ${appointment.primaryPhysician}`
         : `We regret to inform you that your appointment has been cancelled for the following reason: ${appointment.cancellationReason}`
       }
     `

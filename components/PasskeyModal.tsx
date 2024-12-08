@@ -22,11 +22,11 @@ import { useState, useEffect } from "react";
 const PasskeyModal = () => {
   const router = useRouter();
   const path = usePathname();
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
   const [passkey, setPasskey] = useState("");
   const [error, setError] = useState("");
 
-  const encryptedKey = typeof window !== undefined ? window.localStorage.getItem("accessKey") : null;
+  const encryptedKey = typeof window !== "undefined" ? window.localStorage.getItem("accessKey") : null;
 
   useEffect(() => {
     const accessKey = encryptedKey && decryptKey(encryptedKey);
@@ -41,6 +41,10 @@ const PasskeyModal = () => {
     }
   }, [encryptedKey])
 
+  const closeModal = () => {
+    setOpen(false);
+    router.push("/");
+  }
 
   const validatePasskey = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
@@ -54,11 +58,6 @@ const PasskeyModal = () => {
     } else {
       setError("Invalid passkey. Please try again.")
     }
-  }
-
-  const closeModal = () => {
-    setOpen(false);
-    router.push('/admin');
   }
 
   return (
