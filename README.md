@@ -41,19 +41,19 @@ The system adapts well to both mobile and desktop screens for seamless usage.
 ### 🩺 Patient Interfaces
 
 #### 🔐 Patient Login Page
-![onboarding](https://hackmd.io/_uploads/rkDSatOZge.jpg)
+![onboarding](/public/assets/screenshots/onboarding.jpg)
 
 
 #### 📝 Patient Information Form
-![patient-form-page](https://hackmd.io/_uploads/SyNDaF_-xl.jpg)
+![patient-form-page](/public/assets/screenshots/patient-form-page.jpg)
 
 
 #### 📅 Appointment Booking Page
-![appointment-form-page](https://hackmd.io/_uploads/SkYDaYd-eg.jpg)
+![appointment-form-page](/public/assets/screenshots/appointment-form-page.jpg)
 
 
 #### ✅ Appointment Success Confirmation
-![success-page](https://hackmd.io/_uploads/ryd_6Yubgx.jpg)
+![success-page](/public/assets/screenshots/success-page.jpg)
 
 
 ---
@@ -61,19 +61,19 @@ The system adapts well to both mobile and desktop screens for seamless usage.
 ### 🧑‍⚕️ Admin Interfaces
 
 #### 🔑 Admin Login Verification
-![Admin-verfication](https://hackmd.io/_uploads/B1Xf0Y_Zxx.jpg)
+![Admin-verfication](/public/assets/screenshots/Admin-verfication.jpg)
 
 
 #### 📊 Admin Dashboard
-![Dashboard](https://hackmd.io/_uploads/SkRfAKO-eg.jpg)
+![Dashboard](/public/assets/screenshots/Dashboard.jpg)
 
 
 #### 📆 Appointment Scheduling View
-![Appointment Schedule](https://hackmd.io/_uploads/rJWrRFuble.jpg)
+![Appointment Schedule](/public/assets/screenshots/Appointment%20Schedule.jpg)
 
 
 #### ❌ Appointment Cancellation
-![Appointment-cancellation](https://hackmd.io/_uploads/SJ5B0tuZle.jpg)
+![Appointment-cancellation](/public/assets/screenshots/Appointment-cancellation.jpg)
 
 
 ---
